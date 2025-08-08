@@ -72,6 +72,7 @@
 </head>
   
 <body>
+   <div id="mainContent" style="display: none;"> <!-- Contenedor de la página -->
 
   <h1>IMPREPLAST</h1>
   
@@ -103,6 +104,15 @@
   <img id="zoomImg" src="" alt="Zoom">
   <button onclick="cerrarZoom()">✖ Cerrar</button>
 </div>
+  </div>
+  
+   <!-- Login Section -->
+  <div id="loginContainer" style="text-align: center;">
+    <h2>Iniciar sesión</h2>
+    <input type="text" id="cuit" placeholder="Ingresa tu CUIT" style="padding: 10px; width: 200px;">
+    <button onclick="login()">Ingresar</button>
+    <p id="errorMessage" style="color: red; display: none;">CUIT incorrecto o inactivo</p>
+  </div>
 
 <script>
 const products = [];
@@ -119,6 +129,44 @@ if (savedCart) {
   Object.assign(cart, JSON.parse(savedCart));
   updateCart();
 }
+
+let usersData = [];
+
+// Cargar los datos de CUIT desde el Google Sheet
+function cargarUsuarios() {
+  fetch("https://opensheet.elk.sh/1Mj-U8cmqS2gR0rlZnu8So29AlUT7yglTH_cUku8MLVY/Hoja2")
+    .then(res => res.json())
+    .then(data => {
+      usersData = data; // Guardamos los datos de los CUIT
+    })
+    .catch(error => console.log('Error al cargar usuarios:', error));
+}
+
+cargarUsuarios(); // Cargar los usuarios al inicio
+
+// Verificar el CUIT ingresado
+function login() {
+  const cuit = document.getElementById("cuit").value.trim();  // Obtenemos el CUIT del formulario
+  
+  // Verificamos que el CUIT no esté vacío
+  if (!cuit) {
+    alert("Por favor ingresa un CUIT.");
+    return;
+  }
+
+  // Verificamos si el CUIT ingresado existe en los datos cargados
+  const user = usersData.find(u => u.CUIT === cuit);  // Buscar el CUIT en la lista de usuarios
+
+  if (user) {
+    // Si el CUIT es válido, mostramos la tienda y el carrito
+    document.getElementById("loginContainer").style.display = "none";  // Ocultamos el formulario de login
+    document.getElementById("mainContent").style.display = "block";  // Mostramos la tienda y el carrito
+  } else {
+    // Si el CUIT es incorrecto, mostramos un mensaje de error
+    document.getElementById("errorMessage").style.display = "block";  // Mostramos el mensaje de error
+  }
+}
+
   
  function cargarProductos() {
   fetch("https://opensheet.elk.sh/1Mj-U8cmqS2gR0rlZnu8So29AlUT7yglTH_cUku8MLVY/Hoja1")
